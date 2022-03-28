@@ -6,5 +6,5 @@ set -e
 mkdir -p ~/.kube
 echo $INPUT_KUBECONFIG | base64 -d > ~/.kube/config
 
-# Execute kubectl command
-sh -c "kubectl $*"
+# Execute multiple kubectl commands
+echo "$*" | while IFS= read line ; do kubectl $line; done
