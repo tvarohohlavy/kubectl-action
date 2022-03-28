@@ -34,3 +34,19 @@ cat .kube/config | base64
     kubeconfig: ${{ secrets.KUBE_CONFIG }}
     args: apply -f deployment.yaml
 ```
+
+
+## Multiple kubectl commands
+```yaml
+- uses: danielr1996/kubectl-action@1.0.0
+  name: Deploy
+  with:
+    kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    args: |
+      create namespace my-namespace
+      delete secret -n my-namespace secret-credentials --ignore-not-found
+      create secret -n my-namespace generic secret-credentials \
+                    --from-literal=USERNAME=${{secrets.USERNAME}} \
+                    --from-literal=PASSWORD=${{secrets.PASSWORD}}
+      apply -f deployment.yaml
+```
