@@ -17,6 +17,12 @@ Base64 encoded `.kube/config` file, to generate use:
 cat .kube/config | base64
 ```
 
+## Outputs
+### `output`
+
+kubectl commands output
+
+
 ## Usage
 ## Kustomize a Deployment
 ```yaml
@@ -49,4 +55,44 @@ cat .kube/config | base64
                     --from-literal=USERNAME=${{secrets.USERNAME}} \
                     --from-literal=PASSWORD=${{secrets.PASSWORD}}
       apply -f deployment.yaml
+```
+
+
+
+## Outputs usage
+
+```yaml
+  scale_down:
+    runs-on: [ self-hosted ]
+    outputs:
+     replicas: ${{ steps.get_replicas.outputs.output }}
+    steps:
+    - name: get replicas count
+      id: get_replicas
+      uses: danielr1996/kubectl-action@1.0.0
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+        args: |
+          get deployments.apps app -o jsonpath='{.spec.replicas}'
+    - name: scale down to 0 replicas
+      uses: danielr1996/kubectl-action@1.0.0
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+        args: |
+          scale --replicas=0 deployment app
+
+  scale_up:
+    runs-on: [ self-hosted ]
+    needs: [ scale_down ]
+    steps:          
+    - name: create environmental variable
+      run: |
+        echo "REPLICAS=${{ needs.scale_down.outputs.replicas }}" | tr -d "'" >> $GITHUB_ENV
+        
+    - name: scale up to original number of replicas
+      uses: danielr1996/kubectl-action@1.0.0
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+        args: |
+          scale --replicas=${{ env.REPLICAS }} deployment app
 ```
