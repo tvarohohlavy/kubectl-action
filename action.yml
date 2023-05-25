@@ -10,3 +10,6 @@ runs:
 inputs:
   kubeconfig:
     description: 'base64 encoded .kube/config'
+outputs:
+  output:
+    description: 'kubectl commands output'
