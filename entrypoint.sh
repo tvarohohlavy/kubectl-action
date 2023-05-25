@@ -6,5 +6,7 @@ set -e
 mkdir -p ~/.kube
 echo $INPUT_KUBECONFIG | base64 -d > ~/.kube/config
 
-# Execute multiple kubectl commands
-echo "$*" | while IFS= read line ; do kubectl $line; done
+# Execute multiple commands
+OUTPUT=$( echo "$*" | while IFS= read line ; do kubectl $line; done )
+
+echo "::set-output name=output::$OUTPUT"
